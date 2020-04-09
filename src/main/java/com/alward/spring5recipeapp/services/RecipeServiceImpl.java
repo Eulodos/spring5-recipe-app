@@ -7,6 +7,7 @@ import com.alward.spring5recipeapp.domain.Recipe;
 import com.alward.spring5recipeapp.repositories.RecipeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -40,6 +41,13 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeById.orElseThrow(() -> new RuntimeException("Recipe not found"));
     }
 
+    @Transactional
+    @Override
+    public RecipeCommand findCommandById(Long id) {
+        return recipeToRecipeCommand.convert(findById(id));
+    }
+
+    @Transactional
     @Override
     public RecipeCommand saveRecipeCommand(RecipeCommand command) {
         Recipe detachedRecipe = recipeCommandToRecipe.convert(command);
