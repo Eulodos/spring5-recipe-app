@@ -1,6 +1,8 @@
 package com.alward.spring5recipeapp.controllers;
 
 import com.alward.spring5recipeapp.commands.IngredientCommand;
+import com.alward.spring5recipeapp.commands.RecipeCommand;
+import com.alward.spring5recipeapp.commands.UnitOfMeasureCommand;
 import com.alward.spring5recipeapp.services.IngredientService;
 import com.alward.spring5recipeapp.services.RecipeService;
 import com.alward.spring5recipeapp.services.UnitOfMeasureService;
@@ -55,5 +57,19 @@ public class IngredientController {
         log.debug("Saved Ingredient ID: " + savedCommand.getId());
 
         return "redirect:/recipe/" + savedCommand.getRecipeId() + "/ingredient/" + savedCommand.getId() + "/show";
+    }
+
+    @GetMapping("/recipe/{recipeId}/ingredient/new")
+    public String newRecipe(@PathVariable String recipeId, Model model) {
+        RecipeCommand commandById = recipeService.findCommandById(Long.valueOf(recipeId));
+
+        IngredientCommand ingredientCommand = new IngredientCommand();
+        ingredientCommand.setRecipeId(Long.valueOf(recipeId));
+        model.addAttribute("ingredient", ingredientCommand);
+        model.addAttribute("uomList", unitOfMeasureService.listAllUoms());
+
+        ingredientCommand.setUnitOfMeasure(new UnitOfMeasureCommand());
+
+        return "recipe/ingredient/ingredientform";
     }
 }
