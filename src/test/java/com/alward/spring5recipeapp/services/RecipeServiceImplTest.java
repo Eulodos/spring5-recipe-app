@@ -3,6 +3,7 @@ package com.alward.spring5recipeapp.services;
 import com.alward.spring5recipeapp.converters.RecipeCommandToRecipe;
 import com.alward.spring5recipeapp.converters.RecipeToRecipeCommand;
 import com.alward.spring5recipeapp.domain.Recipe;
+import com.alward.spring5recipeapp.exceptions.NotFoundException;
 import com.alward.spring5recipeapp.repositories.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,5 +72,18 @@ class RecipeServiceImplTest {
         recipeService.deleteById(idToDelete);
 
         verify(recipeRepository, times(1)).deleteById(eq(idToDelete));
+    }
+
+    @Test
+    void testGetRecipeByIdNotFoundShouldThrowNotFoundException() {
+        Optional<Recipe> recipeOptional = Optional.empty();
+
+        when(recipeRepository.findById(anyLong())).thenReturn(recipeOptional);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            Recipe byId = recipeService.findById(1L);
+        });
+
+        assertEquals("Recipe not found. ID:1", exception.getMessage());
     }
 }
