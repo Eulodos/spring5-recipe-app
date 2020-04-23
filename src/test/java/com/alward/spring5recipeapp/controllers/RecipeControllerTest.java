@@ -32,7 +32,9 @@ class RecipeControllerTest {
     @BeforeEach
     void setUp() {
         recipeController = new RecipeController(recipeService);
-        mockMvc = MockMvcBuilders.standaloneSetup(recipeController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(recipeController)
+                .setControllerAdvice(new ExceptionHandlerController())
+                .build();
     }
 
     @Test
@@ -67,9 +69,24 @@ class RecipeControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("id", "")
                 .param("description", "some value")
-        ).andExpect(status().is3xxRedirection())
+                .param("directions", "some directions")
+        )
+                .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/recipe/5/show"));
 
+    }
+
+    @Test
+    void testPostNewRecipeFormValidationFails() throws Exception {
+        mockMvc.perform(post("/recipe")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("id", "")
+                .param("cookTime", "3000")
+        )
+                .andExpect(model().attributeHasErrors("recipe"))
+                .andExpect(model().errorCount(3))
+                .andExpect(status().isOk())
+                .andExpect(view().name("recipe/recipeform"));
     }
 
     @Test
@@ -86,7 +103,7 @@ class RecipeControllerTest {
     }
 
     @Test
-    void testDeletById() throws Exception {
+    void testDeleteById() throws Exception {
         mockMvc.perform(get("/recipe/1/delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));
